@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from 'node_modules/@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NoteRequestDTO } from './dto/note-request.dto';
 import { NoteResponseDTO } from './dto/note-response.dto';
 import { NoteEntity } from './entity/note.entity';
 import { NoteMapper } from './note.mapper';
+import { NoteNotFoundException } from '../common/note-not-found.exception';
 
 @Injectable()
 export class NoteService {
@@ -21,7 +22,7 @@ export class NoteService {
   async getNote(id: number): Promise<NoteResponseDTO> {
     const retrievedNote = await this.repository.findOneBy({ id });
     if (!retrievedNote) {
-      throw new NotFoundException('Note with id ' + id + ' not found!');
+      throw new NoteNotFoundException(id);
     }
     return this.mapper.toResponse(retrievedNote)!;
   }
@@ -35,7 +36,7 @@ export class NoteService {
   async updateNote(id: number, request: NoteRequestDTO): Promise<NoteResponseDTO> {
     const retrievedNote = await this.repository.findOneBy({ id });
     if (!retrievedNote) {
-      throw new NotFoundException('Note with id ' + id + ' not found!');
+      throw new NoteNotFoundException(id);
     }
 
     retrievedNote.title = request.title;
@@ -48,7 +49,7 @@ export class NoteService {
   async deleteNote(id: number): Promise<void> {
     const retrievedNote = await this.repository.findOneBy({ id });
     if (!retrievedNote) {
-      throw new NotFoundException('Note with id ' + id + ' not found!');
+      throw new NoteNotFoundException(id);
     }
     await this.repository.remove(retrievedNote);
   }
